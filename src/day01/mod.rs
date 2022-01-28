@@ -1,7 +1,3 @@
-// #![allow(dead_code)]
-//temp flag ends here
-
-// use std::env;
 use std::fs;
 use std::cmp::Ordering;
 
