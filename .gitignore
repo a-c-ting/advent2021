@@ -1,0 +1,4 @@
+/target
+/input
+/src/day01/test.rs
+*.code-workspace
