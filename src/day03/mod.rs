@@ -1,6 +1,8 @@
-// #![allow(unused_variables)]
-// #![allow(unused_mut)]
+#![allow(unused_variables)]
+#![allow(unused_mut)]
+#![allow(dead_code)]
 //temp flags, remove before commit
+const BITCOUNT: usize = 12;
 
 use std::cmp::Ordering;
 use crate::shared_utils::read_input;
@@ -11,48 +13,110 @@ pub fn execute(){
     let input_vector = file_contents.split_terminator('\n').collect::<Vec<_>>();
 
     read_power_consumption(&input_vector);
+    read_life_support_rating(&input_vector);
 }
 
 fn read_power_consumption(input_vector: &Vec<&str>) {
-    let (mut gamma_rate, mut epsilon_rate) = (0, 0);
-    const BITCOUNT: usize = 12;
-    let mut one_counter_array = [0; BITCOUNT];
-    // let mut gamma_rate_bits = String::new();
-    // let mut epsilon_rate_bits = String::new();
-    let reading_len = input_vector.len();
+    let int_vec = transform_to_int_array(input_vector);
 
-    for lines in input_vector {
-        let mut tracker = 0;
-        for r_bits in lines.chars() {
-            match r_bits {
-                '1' => one_counter_array[tracker]+=1,
-                '0' => (),
-                _ => unreachable!(),
+    let mut one_counter_array: [u32; BITCOUNT] = [0; BITCOUNT];
+    for entry in &int_vec {
+        for bitshift in 1..BITCOUNT+1 {
+            let target_bit_check = entry & ( 1 << (BITCOUNT - bitshift) );
+            match target_bit_check > 0 {
+                true => one_counter_array[bitshift-1]+=1,
+                false => (),
             }
-            tracker+=1;
         }
     }
 
-    let mut bitshift = 1;
-    for ones in one_counter_array {
-        match ones.cmp(&(reading_len - ones)) {
-            Ordering::Less => {
-                // gamma_rate_bits.push('0');
-                // epsilon_rate_bits.push('1');
-                gamma_rate += 1 << (BITCOUNT - bitshift);
-            },
-            Ordering::Greater => {
-                // gamma_rate_bits.push('1');
-                // epsilon_rate_bits.push('0');
-                epsilon_rate += 1 << (BITCOUNT - bitshift);
-            },
+    let mut gamma_rate_b = String::new();
+    let readings_count = int_vec.len();
+    for bits in one_counter_array {
+        match bits.cmp(&(readings_count as u32 - bits)) {
+            Ordering::Greater => gamma_rate_b.push('1'),
+            Ordering::Less => gamma_rate_b.push('0'),
             Ordering::Equal => unreachable!(),
         }
-        bitshift+=1;
     }
-    // println!("gamma rate bits {}", gamma_rate_bits);
-    // println!("epsilon rate bits {}", epsilon_rate_bits);
-    println!("Gamma rate {}", gamma_rate);
-    println!("Epsilon rate {}", epsilon_rate);
-    println!("Power Consumption {}", gamma_rate*epsilon_rate);
+
+    let gamma_rate = u32::from_str_radix(&gamma_rate_b, 2).unwrap();
+    let epsilon_rate = (!gamma_rate) & ( (1 << BITCOUNT) - 1 );
+    println!("Gamma rate: {}\nEpsilon rate: {}", gamma_rate, epsilon_rate);
+    println!("Power Consumption: {}\n", gamma_rate*epsilon_rate);
+}
+
+fn read_life_support_rating(input_vector: &Vec<&str>) {
+    let int_vec = transform_to_int_array(input_vector);
+
+    let mut int_vec_t = int_vec.clone();
+    let ogr = get_oxygen_generator_rating(int_vec_t);
+    let mut int_vec_t = int_vec.clone();
+    let cgr = get_co2_scruber_rating(int_vec_t);
+    println!("OGR: {}\nCSR: {}", ogr, cgr);
+    println!("Life Support Rating: {}", ogr*cgr);
+}
+
+fn get_oxygen_generator_rating(mut int_vec_t: Vec<u32>) -> u32 {
+    for bitshift in 1..BITCOUNT+1 {
+        let (mut ones, mut zeros) = (0,0);
+        let mut target_bit_check: u32;
+        for entry in &int_vec_t {
+            target_bit_check = entry & ( 1 << (BITCOUNT - bitshift) );
+            match target_bit_check {
+                0 => zeros+=1,
+                _ => ones+=1,
+            }
+        }
+
+        match ones.cmp(&zeros) {
+            Ordering::Less => {
+                int_vec_t.retain(|&x| (x & (1 << (BITCOUNT - bitshift)) ) == 0 );
+            },
+            _ => {
+                int_vec_t.retain(|&x| (x & (1 << (BITCOUNT - bitshift)) ) > 0 );
+            },
+        }
+
+        if 1 == int_vec_t.len() {
+            break;
+        }
+    }
+    int_vec_t[0]
+}
+
+fn get_co2_scruber_rating(mut int_vec_t: Vec<u32>) -> u32 {
+    for bitshift in 1..BITCOUNT+1 {
+        let (mut ones, mut zeros) = (0,0);
+        let mut target_bit_check: u32;
+        for entry in &int_vec_t {
+            target_bit_check = entry & ( 1 << (BITCOUNT - bitshift) );
+            match target_bit_check {
+                0 => zeros+=1,
+                _ => ones+=1,
+            }
+        }
+
+        match ones.cmp(&zeros) {
+            Ordering::Less => {
+                int_vec_t.retain(|&x| (x & (1 << (BITCOUNT - bitshift)) ) > 0 );
+            },
+            _ => {
+                int_vec_t.retain(|&x| (x & (1 << (BITCOUNT - bitshift)) ) == 0 );
+            },
+        }
+
+        if 1 == int_vec_t.len() {
+            break;
+        }
+    }
+    int_vec_t[0]
+}
+
+fn transform_to_int_array(input_vector: &Vec<&str>) -> Vec<u32> {
+    let mut int_vec: Vec<u32> = Vec::new();
+    for entries in input_vector {
+        int_vec.push(u32::from_str_radix(*entries, 2).unwrap());
+    }
+    int_vec
 }
