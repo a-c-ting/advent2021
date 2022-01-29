@@ -1,11 +1,7 @@
-#![allow(unused_variables)]
-#![allow(unused_mut)]
-#![allow(dead_code)]
-//temp flags, remove before commit
-const BITCOUNT: usize = 12;
-
 use std::cmp::Ordering;
 use crate::shared_utils::read_input;
+
+const BITCOUNT: usize = 12;
 
 pub fn execute(){
     let file_contents = read_input(".\\input\\day03.txt");
@@ -49,12 +45,12 @@ fn read_power_consumption(input_vector: &Vec<&str>) {
 fn read_life_support_rating(input_vector: &Vec<&str>) {
     let int_vec = transform_to_int_array(input_vector);
 
-    let mut int_vec_t = int_vec.clone();
+    let int_vec_t = int_vec.clone();
     let ogr = get_oxygen_generator_rating(int_vec_t);
-    let mut int_vec_t = int_vec.clone();
+    let int_vec_t = int_vec.clone();
     let cgr = get_co2_scruber_rating(int_vec_t);
     println!("OGR: {}\nCSR: {}", ogr, cgr);
-    println!("Life Support Rating: {}", ogr*cgr);
+    println!("Life Support Rating: {}\n", ogr*cgr);
 }
 
 fn get_oxygen_generator_rating(mut int_vec_t: Vec<u32>) -> u32 {
