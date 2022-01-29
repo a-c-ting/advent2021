@@ -1,12 +1,8 @@
-use std::fs;
+use crate::shared_utils::read_input;
 use std::cmp::Ordering;
 
 pub fn execute() {
-    let input_path = ".\\input\\day01.txt";
-    println!("Reading file {}", input_path);
-
-    let file_contents = fs::read_to_string(input_path)
-        .expect("Error in Reading File");
+    let file_contents = read_input(".\\input\\day01.txt");
 
     let converted_input = convert_input(file_contents);
 

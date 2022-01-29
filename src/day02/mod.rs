@@ -1,11 +1,7 @@
-use std::fs;
+use crate::shared_utils::read_input;
 
 pub fn execute() {
-    let input_path = ".\\input\\day02.txt";
-    println!("Reading file {}\n", input_path);
-
-    let file_contents = fs::read_to_string(input_path)
-        .expect("Error in Reading File");
+    let file_contents = read_input(".\\input\\day02.txt");
 
     let input_vector = file_contents.split_terminator('\n').collect::<Vec<_>>();
 
