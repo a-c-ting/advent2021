@@ -4,6 +4,7 @@ mod day03;
 mod day04;
 mod day05;
 mod day06;
+mod day07;
 mod shared_utils;
 
 use std::env;
@@ -20,6 +21,7 @@ fn main() {
         4 => day04::execute(),
         5 => day05::execute(),
         6 => day06::execute(),
+        7 => day07::execute(),
         _ => println!("That doesn't exist!"),
     }
 }
