@@ -1,24 +1,16 @@
 use crate::shared_utils::read_input;
 use std::collections::HashMap;
 
-#[derive(Debug)]
 struct DisplayedSequence {
-    pattern: Vec<String>,
-    output: Vec<String>,
+    patterns: Vec<String>,
+    outputs: Vec<String>,
 }
 
 impl DisplayedSequence {
-    pub fn _empty() -> DisplayedSequence {
+    pub fn new(patterns: Vec<String>, outputs: Vec<String>) -> DisplayedSequence {
         DisplayedSequence {
-            pattern : Vec::new(),
-            output : Vec::new(),
-        }
-    }
-
-    pub fn new(pattern: Vec<String>, output: Vec<String>) -> DisplayedSequence {
-        DisplayedSequence {
-            pattern,
-            output,
+            patterns,
+            outputs,
         }
     }
 }
@@ -28,42 +20,35 @@ pub fn execute() {
     let input_string_vector =
         file_contents.split_terminator('\n').collect::<Vec<_>>();
 
-    let pattern_and_output = process_display(input_string_vector);
-    count_unique_numbers(&pattern_and_output);
+    let display_sequences = process_display(input_string_vector);
+    count_unique_numbers(&display_sequences);
 
-    deduce_display(&pattern_and_output);
+    deduce_output(&display_sequences);
 }
 
-fn deduce_display(pattern_and_output: &Vec<DisplayedSequence>) {
+fn deduce_output(displayed_sequences: &Vec<DisplayedSequence>) {
     let mut total = 0;
 
-    for displayed_seq in pattern_and_output {
+    for displayed_seq in displayed_sequences {
         let mut map: HashMap<String, u16> = HashMap::new();
 
-        //1, 4, 7, 8 have unique segments used
-        for displayed in &displayed_seq.pattern {
-            match displayed.len() {
-                2 => { map.insert(displayed.to_string(), 1); },
-                4 => { map.insert(displayed.to_string(), 4); },
-                3 => { map.insert(displayed.to_string(), 7); },
-                7 => { map.insert(displayed.to_string(), 8); },
+        //1, 4, 7, 8 have unique number of segments used
+        for pattern in &displayed_seq.patterns {
+            match pattern.len() {
+                2 => { map.insert(pattern.to_string(), 1); },
+                4 => { map.insert(pattern.to_string(), 4); },
+                3 => { map.insert(pattern.to_string(), 7); },
+                7 => { map.insert(pattern.to_string(), 8); },
                 _ => (),
             }
         }
 
-        /*
-        * 7-seg display -> top, center, bottom, upper left, upper right
-        *                  lower left, lower right,
-        */
-        find_six(&mut map, displayed_seq);
-        find_five(&mut map, displayed_seq);
-        find_two_and_three(&mut map, displayed_seq);
-        find_nine_and_zero(&mut map, displayed_seq);
+        find_other_numbers(&mut map, displayed_seq);
 
         total += decode_sequence(&map, displayed_seq);
     }
 
-    println!("Total: {}", total);
+    println!("Sum of all output: {}", total);
 }
 
 fn decode_sequence(map: &HashMap<String, u16>,
@@ -71,75 +56,77 @@ fn decode_sequence(map: &HashMap<String, u16>,
     let mut output_int = 0;
 
     let multipliers = [1000, 100, 10, 1];
-    for (x, output) in (&displayed.output).into_iter().enumerate() {
-        for (y, int_ver) in map {
-            if includes_all(y, output) && output.len() == y.len() {
-                output_int += multipliers[x] * int_ver;
+    for (display_pos, output) in (&displayed.outputs).into_iter().enumerate() {
+        for (sequence, int_ver) in map {
+            if includes_all(sequence, output) &&
+                output.len() == sequence.len() {
+                output_int += multipliers[display_pos] * int_ver;
             }
         }
     }
+
     output_int.into()
 }
 
-fn find_six(map: &mut HashMap<String, u16>,
+fn find_other_numbers(map: &mut HashMap<String, u16>,
     displayed: &DisplayedSequence) {
 
-    for pattern in &displayed.pattern {
+    /*
+    * 7-seg display -> top, center, bottom, upper left,
+    *           upper right(UR), lower left(LL), lower right,
+    * Sequence -> Find 6, get UR char, find 5, find LL char,
+    *           find 2, find 3, find 9, only one left is zero
+    *
+    * Note: A u8 representation might be better.
+    *       Each bit would be a segment representation.
+    */
+
+    // Six
+    for pattern in &displayed.patterns {
         if 6 == pattern.len()
         && !includes_all(pattern, &get_seq(map, 1)) {
             map.insert(pattern.to_owned(), 6);
         }
     }
-}
 
-fn find_five(map: &mut HashMap<String, u16>,
-    displayed: &DisplayedSequence) {
-
+    // UR -> Five
     let upper_right_segment =
         get_diff_letter(&get_seq(map, 6), &get_seq(map, 8));
-
-    for pattern in &displayed.pattern {
+    for pattern in &displayed.patterns {
         if 5 == pattern.len() && !pattern.contains(upper_right_segment) {
             map.insert(pattern.to_owned(), 5);
         }
     }
-}
 
-fn find_two_and_three(map: &mut HashMap<String, u16>,
-    displayed: &DisplayedSequence) {
+    // LL -> Two
     let lower_left_segment =
         get_diff_letter(&get_seq(map, 5), &get_seq(map, 6));
-
-    for pattern in &displayed.pattern {
+    for pattern in &displayed.patterns {
         if 5 == pattern.len() && pattern.contains(lower_left_segment) {
             map.insert(pattern.to_owned(), 2);
         }
     }
 
-    //only one sequence using 5 segments left: 3
-    for pattern in &displayed.pattern {
+    // Three (only sequence left with 5 segments not mapped)
+    for pattern in &displayed.patterns {
         if 5 == pattern.len() && !map.contains_key(pattern) {
             map.insert(pattern.to_owned(), 3);
         }
     }
-}
 
-fn find_nine_and_zero(map: &mut HashMap<String, u16>,
-    displayed: &DisplayedSequence) {
-
-    for pattern in &displayed.pattern {
+    // Nine
+    for pattern in &displayed.patterns {
         if 6 == pattern.len() && includes_all(pattern, &get_seq(&map, 3)) {
             map.insert(pattern.to_owned(), 9);
         }
     }
 
-    //zero is the only sequence left
-    for pattern in &displayed.pattern {
+    // Zero (only sequence left not mapped)
+    for pattern in &displayed.patterns {
         if 6 == pattern.len() && !map.contains_key(pattern) {
             map.insert(pattern.to_owned(), 0);
         }
     }
-
 }
 
 fn get_diff_letter(seq: &String, more_segs_seq: &String) -> char {
@@ -157,13 +144,12 @@ fn get_diff_letter(seq: &String, more_segs_seq: &String) -> char {
 }
 
 fn includes_all(target: &String, required_segs: &String) -> bool {
-    let mut check = true;
     for t_char in required_segs.chars() {
         if !target.contains(t_char) {
-            check = false;
+            return false
         }
     }
-    check
+    true
 }
 
 fn get_seq(map: &HashMap<String, u16>, needed_num: u16) -> String {
@@ -184,7 +170,7 @@ fn get_seq(map: &HashMap<String, u16>, needed_num: u16) -> String {
 fn count_unique_numbers(pattern_and_output: &Vec<DisplayedSequence> ) {
     let mut unique_characters_count = 0;
     for displayed_seq in pattern_and_output {
-        for displayed in &displayed_seq.output {
+        for displayed in &displayed_seq.outputs {
             match displayed.len() {
                 /*
                 1 requires 2 segments
@@ -202,7 +188,6 @@ fn count_unique_numbers(pattern_and_output: &Vec<DisplayedSequence> ) {
 }
 
 fn process_display(input: Vec<&str>) -> Vec<DisplayedSequence> {
-    // let mut displayed_sequences: Vec<(Vec<&str>, Vec<&str>)> = Vec::new();
     let mut displayed_sequences: Vec<DisplayedSequence> = Vec::new();
     for x in input {
         let pair = x.split('|').collect::<Vec<&str>>();
