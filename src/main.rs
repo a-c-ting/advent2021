@@ -9,11 +9,15 @@ mod day08;
 mod day09;
 mod day10;
 mod day11;
+mod day12;
 mod shared_utils;
 
 use std::env;
+use std::time::Instant;
 
 fn main() {
+    let timer = Instant::now();
+
     let args: Vec<String> = env::args().collect();
     let target = &args[1].parse::<i32>().unwrap();
 
@@ -30,6 +34,10 @@ fn main() {
         9 => day09::execute(),
         10 => day10::execute(),
         11 => day11::execute(),
+        12 => day12::execute(),
         _ => println!("That doesn't exist!"),
     }
+
+    let elapsed = timer.elapsed();
+    println!("\nexecution time: {:.2?}", elapsed);
 }
