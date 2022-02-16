@@ -56,7 +56,17 @@ struct ExplorerMap {
 
 impl ExplorerMap {
     fn build_map(input: Vec<&str>) -> ExplorerMap {
-        let mut map = ExplorerMap::new();
+        let mut map = ExplorerMap {
+            areas: BTreeMap::new(),
+            nv_caves: HashMap::new(),
+            current_path: Vec::new(),
+            explored_paths: Vec::new(),
+            modified_rules: false,
+            already_vsct: false,
+
+            map_coding: HashMap::new(),
+            explorable_area: 0,
+        };
 
         for connections in input.iter().map(
             |x| x.split_terminator('-').collect::<Vec<&str>>())
@@ -68,20 +78,6 @@ impl ExplorerMap {
         }
 
         map
-    }
-
-    fn new() -> ExplorerMap {
-        ExplorerMap {
-            areas: BTreeMap::new(),
-            nv_caves: HashMap::new(),
-            current_path: Vec::new(),
-            explored_paths: Vec::new(),
-            modified_rules: false,
-            already_vsct: false,
-
-            map_coding: HashMap::new(),
-            explorable_area: 0,
-        }
     }
 
     fn add_from_path(self: &mut Self, path: Vec<&str>) {
