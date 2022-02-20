@@ -1,5 +1,7 @@
 use crate::shared_utils::read_input;
 
+type OctoMap = [[usize; 10]; 10];
+
 pub fn execute() {
     let file_contents = read_input(".\\input\\day11.txt");
     let lines =
@@ -12,7 +14,7 @@ pub fn execute() {
     find_octo_sync(&mut copy);
 }
 
-fn find_octo_sync(map: &mut [[usize; 10]; 10]) {
+fn find_octo_sync(map: &mut OctoMap) {
     let mut step = 0;
     while !is_octopus_explosion_synced(map) {
         trigger_step(map);
@@ -23,7 +25,7 @@ fn find_octo_sync(map: &mut [[usize; 10]; 10]) {
     println!("Synced Octopus Explosion found on step {}\n", step);
 }
 
-fn process_steps(map: &mut [[usize; 10]; 10], stepcount: usize) {
+fn process_steps(map: &mut OctoMap, stepcount: usize) {
     let mut flash_count = 0;
 
     for _ in 0..stepcount {
@@ -39,7 +41,7 @@ fn process_steps(map: &mut [[usize; 10]; 10], stepcount: usize) {
     println!("\nFlash count: {}\n", flash_count);
 }
 
-fn is_octopus_explosion_synced(map: &mut [[usize; 10]; 10]) -> bool {
+fn is_octopus_explosion_synced(map: &mut OctoMap) -> bool {
     for rows in map {
         for energy in rows {
             if *energy > 0 {
@@ -50,7 +52,7 @@ fn is_octopus_explosion_synced(map: &mut [[usize; 10]; 10]) -> bool {
     true
 }
 
-fn process_reaction(map: &mut [[usize; 10]; 10]) {
+fn process_reaction(map: &mut OctoMap) {
     loop {
         let target = get_coords_for_update(map);
 
@@ -67,7 +69,7 @@ fn process_reaction(map: &mut [[usize; 10]; 10]) {
     reset_expended_energy(map);
 }
 
-fn reset_expended_energy(map: &mut [[usize; 10]; 10]) {
+fn reset_expended_energy(map: &mut OctoMap) {
     for row in map {
         for col in row {
             if *col > 9 {
@@ -77,7 +79,7 @@ fn reset_expended_energy(map: &mut [[usize; 10]; 10]) {
     }
 }
 
-fn process_energy_wave(map: &mut [[usize; 10]; 10], row: usize, col: usize) {
+fn process_energy_wave(map: &mut OctoMap, row: usize, col: usize) {
     let update_list_s = get_surround_coords(row, col);
     for (r, c) in update_list_s {
         map[r][c] += 1;
@@ -97,7 +99,7 @@ fn validate_increase(energy: usize) -> usize {
     val_energy
 }
 
-fn get_coords_for_update(map: &[[usize; 10]; 10])
+fn get_coords_for_update(map: &OctoMap)
     -> Option<(usize, usize)> {
     let (mut r, mut c) = (0, 0);
     let mut no_flash_found = true;
@@ -148,7 +150,7 @@ fn validate_bounds(x: isize) -> usize {
     limit as usize
 }
 
-fn trigger_step(map: &mut [[usize; 10]; 10]) {
+fn trigger_step(map: &mut OctoMap) {
     for (_, rows) in map.into_iter().enumerate() {
         for energy in rows {
             *energy += 1;
@@ -156,7 +158,7 @@ fn trigger_step(map: &mut [[usize; 10]; 10]) {
     }
 }
 
-fn display_map(map: &[[usize; 10]; 10]) {
+fn display_map(map: &OctoMap) {
     for rows in map {
         for energy in rows {
             if *energy == 0 {
@@ -173,8 +175,8 @@ fn display_map(map: &[[usize; 10]; 10]) {
     }
 }
 
-fn convert_map(input: Vec<&str>) -> [[usize; 10]; 10] {
-    let mut map: [[usize; 10]; 10] = [[0; 10]; 10];
+fn convert_map(input: Vec<&str>) -> OctoMap {
+    let mut map: OctoMap = [[0; 10]; 10];
 
     for (row, lines) in input.into_iter().enumerate() {
         for (column, val_str) in lines.chars().enumerate() {
@@ -185,7 +187,7 @@ fn convert_map(input: Vec<&str>) -> [[usize; 10]; 10] {
     map
 }
 
-fn count_flashes(map: &[[usize; 10]; 10]) -> usize {
+fn count_flashes(map: &OctoMap) -> usize {
     let mut flash_count = 0;
     for (row, rows) in map.into_iter().enumerate() {
         for (column, _) in rows.into_iter().enumerate() {

@@ -1,6 +1,6 @@
 /*
  * Leaving this intact coz I really liked this solution.
- * That and Part 2 lead me to reimplementation.
+ * That and Part 2 didn't lead me to reimplementation.
  *
  *  NNNCBB  -> broken down into connections or "chains"
  * iN
