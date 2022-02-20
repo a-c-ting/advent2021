@@ -10,19 +10,21 @@
  *
  * 2. Next visit is always the smallest distance from current note.
  *    This is where BinaryHeap/MinHeap comes useful.
- *    Rust docs actually has some nice example here:
+ *    Rust docs actually has a nice example here:
  *    https://doc.rust-lang.org/std/collections/binary_heap/index.html
  *
  * 3. You need a way to track if you want the actual path.
  *
  */
 
+mod node_types;
+
 use std::collections::HashMap;
 use std::collections::BTreeSet;
 use std::collections::BinaryHeap;
-use std::cmp;
 
 use crate::shared_utils::read_input;
+use crate::day15::node_types::*;
 
 type DMap = HashMap<(usize, usize), Node>;
 
@@ -32,8 +34,17 @@ pub fn execute() {
         file_contents.split_terminator('\n').collect::<Vec<_>>();
 
     let (mut map, map_len) = generate_map(lines);
+    let copy = map.clone();
+
+    println!("Part 1");
     dijkstra(&mut map, map_len);
-    print_best_path(&map, map_len);
+    _print_best_path(&map, map_len);
+
+    println!("\nPart 2");
+    let mut full_map = extend_map(copy, map_len);
+    dijkstra(&mut full_map, map_len*5);
+    // Part 2 too big to display well on my terminal
+    //_print_best_path(&full_map, map_len*5);
 }
 
 fn dijkstra(map: &mut DMap, map_len: usize) {
@@ -49,11 +60,11 @@ fn dijkstra(map: &mut DMap, map_len: usize) {
 
     /*
      * Steps
-     * 1. check all unvisited neighbors and adjust estimated_risk
-     * 2. put all current unvisited neighbors as to visit-list
-     * 3. after all neighbors checked mark self as visited
-     * 4. track previous node
-     * 5. move to neighbor with lowest risk
+     * 1. Check all unvisited neighbors and adjust estimated_risk.
+     * 2. Put all current unvisited neighbors as to visit-list (binary heap)
+     * 3. Track previous node for current neighbor
+     * 4. After all neighbors are checked, mark self as visited
+     * 5. Move to neighbor with lowest risk (pop binary heap)
     */
 
     //Step 5
@@ -82,7 +93,7 @@ fn dijkstra(map: &mut DMap, map_len: usize) {
                     }
                 );
 
-                //Step 4
+                //Step 3
                 n_node.previous = (current.x, current.y);
             }
 
@@ -94,7 +105,7 @@ fn dijkstra(map: &mut DMap, map_len: usize) {
             // }
         }
 
-        //Step 3
+        //Step 4
         let current = map.get_mut(&coord.s_coord).unwrap();
         current.is_explored = true;
     }
@@ -102,7 +113,7 @@ fn dijkstra(map: &mut DMap, map_len: usize) {
     unreachable!();
 }
 
-fn print_best_path(map: &DMap, map_len: usize) {
+fn _print_best_path(map: &DMap, map_len: usize) {
     let backtrack_start = (map_len - 1, map_len - 1);
     let backtrack_end = (0, 0);
 
@@ -118,85 +129,12 @@ fn print_best_path(map: &DMap, map_len: usize) {
     for y in 0..map_len {
         for x in 0..map_len{
             match journey_home.contains(&(x,y)) {
-                true => print!("\x1b[93m{}\x1b[0m", map.get(&(x, y)).unwrap().risk),
+                true =>print!("\x1b[93m{}\x1b[0m",
+                    map.get(&(x, y)).unwrap().risk),
                 false => print!("{}", map.get(&(x, y)).unwrap().risk),
             }
         }
         print!("\n");
-    }
-}
-
-#[derive(Clone)]
-struct Node {
-    x: usize,
-    y: usize,
-    risk: usize, //the risk map
-    est_total_risk: usize, //dijkstra
-    is_explored: bool,
-    previous: (usize, usize),
-}
-
-impl Node {
-    fn new(x: usize, y: usize, risk: usize) -> Node {
-        Node {
-            x,
-            y,
-            risk,
-            est_total_risk: usize::MAX,
-            is_explored: false,
-            previous: (0, 0),
-        }
-    }
-
-    fn generate_neighbors(self: &Self, len: usize) -> Vec<(usize, usize)> {
-        let mut temp = vec![
-            Node::generate_coord(self.x as isize, self.y as isize - 1, len),
-            Node::generate_coord(self.x as isize, self.y as isize + 1, len),
-            Node::generate_coord(self.x as isize - 1, self.y as isize, len),
-            Node::generate_coord(self.x as isize + 1, self.y as isize, len),
-        ];
-
-        temp.retain( |x| x.is_some() );
-        let neighbors = temp.iter()
-            .map( |x| x.unwrap() )
-            .collect::<Vec<(usize, usize)>>();
-
-        neighbors
-    }
-
-    fn generate_coord(t_x: isize, t_y: isize, len: usize)
-        -> Option<(usize, usize)> {
-        if t_x < 0
-        || t_y < 0
-        || t_x >= len as isize
-        || t_y >= len as isize {
-            return None
-        }
-        Some( (t_x as usize, t_y as usize) )
-    }
-}
-
-#[derive(Clone, Eq)]
-struct NodeShadow {
-    est_risk: usize,
-    s_coord: (usize, usize),
-}
-
-impl Ord for NodeShadow {
-    fn cmp(&self, other: &Self) -> cmp::Ordering {
-        other.est_risk.cmp(&self.est_risk)
-    }
-}
-
-impl PartialOrd for NodeShadow {
-    fn partial_cmp(&self, other: &Self) -> Option<cmp::Ordering> {
-        Some(self.cmp(other))
-    }
-}
-
-impl PartialEq for NodeShadow {
-    fn eq(&self, other: &Self) -> bool {
-        self.est_risk == other.est_risk
     }
 }
 
@@ -221,4 +159,60 @@ fn generate_map(input: Vec<&str>) -> (DMap, usize) {
     }
 
     (map, map_len)
+}
+
+fn extend_map(map: DMap, map_len: usize) -> DMap {
+    extend_map_down(extend_map_left(map, map_len), map_len)
+}
+
+fn extend_map_left(mut map: DMap, map_len: usize) -> DMap {
+    let mut to_be_added = DMap::new();
+    for ((x, y), node) in &map {
+        for adj_x in 1..5 {
+            let mut new_risk = node.risk;
+            for _ in 0..adj_x {
+                new_risk = increase(new_risk);
+            }
+
+            let new_node = Node::new(x + map_len*adj_x, *y, new_risk);
+
+            to_be_added.insert( (new_node.x, new_node.y), new_node);
+        }
+    }
+
+    for ((x, y), node) in to_be_added {
+        map.insert((x, y), node);
+    }
+
+    map
+}
+
+fn extend_map_down(mut map: DMap, map_len: usize) -> DMap {
+    let mut to_be_added = DMap::new();
+    for ((x, y), node) in &map {
+        for adj_y in 1..5 {
+            let mut new_risk = node.risk;
+            for _ in 0..adj_y {
+                new_risk = increase(new_risk);
+            }
+
+            let new_node = Node::new(*x, y + map_len*adj_y, new_risk);
+
+            to_be_added.insert( (new_node.x, new_node.y), new_node);
+        }
+    }
+
+    for ((x, y), node) in to_be_added {
+        map.insert((x, y), node);
+    }
+
+    map
+}
+
+
+fn increase(risk: usize) -> usize {
+    match risk {
+        9 => return 1,
+        _ => return risk + 1,
+    }
 }
