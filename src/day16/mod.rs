@@ -9,7 +9,6 @@ pub fn execute() {
     let mut reader = convert_from_utf8(file_contents.trim_end());
     reader.analyze_packets();
     reader.process_packets();
-
 }
 
 struct PacketReader {
