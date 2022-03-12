@@ -47,7 +47,7 @@ fn read_life_support_rating(input_vector: &Vec<&str>) {
 
     let int_vec_t = int_vec.clone();
     let ogr = get_oxygen_generator_rating(int_vec_t);
-    let int_vec_t = int_vec.clone();
+    let int_vec_t = int_vec;
     let cgr = get_co2_scruber_rating(int_vec_t);
     println!("OGR: {}\nCSR: {}", ogr, cgr);
     println!("Life Support Rating: {}\n", ogr*cgr);

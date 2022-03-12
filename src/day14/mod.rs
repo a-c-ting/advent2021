@@ -56,7 +56,7 @@ struct Polymerizer {
 }
 
 impl Polymerizer {
-    fn count_elements(self: &mut Self) {
+    fn count_elements(&mut self) {
         self.elements.clear();
 
         for (chain, count) in &self.chains {
@@ -77,12 +77,12 @@ impl Polymerizer {
                 || *element == self.last_element {
                 *count = (*count + 1) / 2;
             } else {
-                *count = *count / 2;
+                *count /= 2;
             }
         }
 
         let (mut least_count, mut most_count) = (usize::MAX, 0);
-        for (_, count) in &self.elements {
+        for count in self.elements.values() {
             if *count > most_count {
                 most_count = *count;
             }
@@ -95,17 +95,17 @@ impl Polymerizer {
     }
 
 
-    fn run_n_steps(self: &mut Self, n: usize) {
+    fn run_n_steps(&mut self, n: usize) {
         for _ in 0..n {
             self.insert_step();
         }
     }
 
-    fn insert_step(self: &mut Self) {
+    fn insert_step(&mut self) {
         let mut chains_to_be_added: Vec<(Chain, usize)> = Vec::new();
         let mut chains_to_be_removed: Vec<(Chain, usize)> = Vec::new();
         for (chain, new_element) in &self.insert_rules {
-            match self.chains.get(&chain) {
+            match self.chains.get(chain) {
                 None => (),
                 Some(num_of_chains) => {
                     chains_to_be_added.push(
@@ -141,13 +141,13 @@ impl Polymerizer {
         // self.cprint();
     }
 
-    fn _cprint(self: &Self) {
+    fn _cprint(&self) {
         for (chain, count) in &self.chains {
-            print!("{}{}: {}\n", chain.a, chain.b, count);
+            println!("{}{}: {}", chain.a, chain.b, count);
         }
     }
 
-    fn init_polymer_template(self: &mut Self) {
+    fn init_polymer_template(&mut self) {
         let mut iter = self.initial_template.chars();
         let mut prev_element = iter.next().unwrap();
 
@@ -188,16 +188,16 @@ impl Polymerizer {
                 };
 
                 t_insert_rules.push((chain, temp[1].to_string()));
-            } else if line.len() != 0 {
+            } else if !line.is_empty() {
                 template = line;
             }
         }
 
-        if template == "" {
+        if template.is_empty() {
             panic!("Polymer template error.")
         }
 
-        let poly = Polymerizer {
+        return Polymerizer {
             initial_template: template.to_string(),
             chains: BTreeMap::new(),
             insert_rules: t_insert_rules,
@@ -205,8 +205,6 @@ impl Polymerizer {
             first_element: String::new(),
             last_element: String::new(),
         };
-
-        poly
     }
 
 }

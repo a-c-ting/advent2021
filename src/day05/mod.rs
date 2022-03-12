@@ -24,10 +24,12 @@ enum Linetype {
 
 pub fn execute() {
     let file_contents = read_input(".\\input\\day05.txt");
-    let input_vector = file_contents.split_terminator('\n').collect::<Vec<_>>()
-        .iter().map(|coords|
-            coords.split_terminator(" -> ").collect::<Vec<&str>>()
-        ).collect::<Vec<Vec<&str>>>();
+    let input_vector = file_contents
+        .split_terminator('\n')
+        .collect::<Vec<_>>()
+        .iter()
+        .map(|coords| coords.split_terminator(" -> ").collect::<Vec<&str>>())
+        .collect::<Vec<Vec<&str>>>();
 
     //Part 1
     let v_map_no_diag = map_vents(&get_line_coords(&input_vector), true);
@@ -122,19 +124,14 @@ fn generate_diag_coords(coords: &VentCoordinates)
 }
 
 fn is_reversed(coords: &VentCoordinates) -> bool {
-    if (coords.y1 > coords.y2) && (coords.x1 > coords.x2)
-        || (coords.y2 > coords.y1) && (coords.x1 < coords.x2)
-    {
-        return false;
-    } else {
-        return true;
-    }
+    !((coords.y1 > coords.y2) && (coords.x1 > coords.x2)
+        || (coords.y2 > coords.y1) && (coords.x1 < coords.x2))
 }
 
 fn get_overlapping_pts(map: &HashMap<HitCoordinates, u32>) -> u32 {
     let mut counter = 0;
 
-    for (_, hits) in map {
+    for hits in map.values() {
         match hits > &(1) {
             true => counter+=1,
             false => (),
@@ -168,10 +165,10 @@ fn get_line_coords(input_vector: &Vec<Vec<&str>>) -> Vec<VentCoordinates> {
         let point2 = coords[1].split_terminator(',').collect::<Vec<&str>>();
         vec.push(
             VentCoordinates {
-                x1: usize::from_str_radix(&point1[0],10).unwrap(),
-                y1: usize::from_str_radix(&point1[1],10).unwrap(),
-                x2: usize::from_str_radix(&point2[0],10).unwrap(),
-                y2: usize::from_str_radix(&point2[1],10).unwrap(),
+                x1: point1[0].parse::<usize>().unwrap(),
+                y1: point1[1].parse::<usize>().unwrap(),
+                x2: point2[0].parse::<usize>().unwrap(),
+                y2: point2[1].parse::<usize>().unwrap(),
             });
     }
 

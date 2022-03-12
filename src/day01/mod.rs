@@ -13,16 +13,15 @@ pub fn execute() {
 }
 
 fn convert_input(file_contents: String) -> Vec<i32> {
-    let input_vector = file_contents.split_whitespace().collect::<Vec<_>>();
-
-    let int_vector: Vec<i32> = input_vector.into_iter().
-        map(|x| x.parse::<i32>().unwrap()).collect();
-    int_vector
+    file_contents
+        .split_whitespace()
+        .map(|x| x.parse::<i32>().unwrap())
+        .collect::<Vec<i32>>()
 }
 
 fn depth_change_count(int_vector: &Vec<i32>) {
     let (mut no_change, mut increase, mut decrease) = (0, 0, 0);
-    let mut prev_depth = int_vector[0].clone();
+    let mut prev_depth = int_vector[0];
 
     for depth in int_vector {
         match depth.cmp(&prev_depth) {
@@ -38,10 +37,10 @@ fn depth_change_count(int_vector: &Vec<i32>) {
 }
 
 fn moving_average_depth_change_count(int_vector: &Vec<i32>) {
-    let ma_depth_tally = get_depth_tally(&int_vector);
+    let ma_depth_tally = get_depth_tally(int_vector);
 
     let (mut no_change, mut increase, mut decrease) = (0, 0, 0);
-    let mut prev_ave_depth = ma_depth_tally[0].clone();
+    let mut prev_ave_depth = ma_depth_tally[0];
     let offset = 2; //moving average offset
     for (pos, &ave_depth) in ma_depth_tally.iter().enumerate() {
         if pos == (ma_depth_tally.len() - offset) {

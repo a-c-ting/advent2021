@@ -27,7 +27,6 @@ enum State {
 enum Packet {
     Literal(usize, usize), //(Len, Num)
     Operator(OpType, usize, LenType, usize), // (Opertor, len, type, len of subpackets)
-
 }
 
 enum OpType {
@@ -71,7 +70,7 @@ impl PacketReader {
         }
     }
 
-    fn analyze_packets(self: &mut Self) {
+    fn analyze_packets(&mut self) {
         let mut state = State::ReadVer;
         let mut packet_ver: usize;
         let mut packet_id: usize = 0;

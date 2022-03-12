@@ -15,7 +15,7 @@ fn no_manual(input_vector: &Vec<&str>) {
     let (mut x, mut y) = (0, 0);
 
     for lines in input_vector {
-        let commands = lines.split(" ").collect::<Vec<_>>();
+        let commands = lines.split(' ').collect::<Vec<_>>();
         match commands[0] {
             "forward" => x+=commands[1].parse::<i32>().unwrap(),
             "down" => y+=commands[1].parse::<i32>().unwrap(),
@@ -31,7 +31,7 @@ fn with_manual(input_vector: &Vec<&str>) {
     let (mut x, mut aim, mut depth) = (0, 0, 0);
 
     for lines in input_vector {
-        let commands = lines.split(" ").collect::<Vec<_>>();
+        let commands = lines.split(' ').collect::<Vec<_>>();
         match commands[0] {
             "forward" => {
                     let x_change = commands[1].parse::<i32>().unwrap();

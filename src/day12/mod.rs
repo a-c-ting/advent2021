@@ -80,7 +80,7 @@ impl ExplorerMap {
         map
     }
 
-    fn add_from_path(self: &mut Self, path: Vec<&str>) {
+    fn add_from_path(&mut self, path: Vec<&str>) {
         for area in &path {
             self.encode(area.to_string());
         }
@@ -88,12 +88,12 @@ impl ExplorerMap {
         self.create_area_from_path(&path);
     }
 
-    fn create_area_from_path(self: &mut Self, path: &Vec<&str>) {
+    fn create_area_from_path(&mut self, path: &Vec<&str>) {
         if !self.areas.contains_key(&self.decode(path[0])) {
             self.areas.insert(self.decode(path[0]),
                 self.create_area(path[0], path[1]));
         } else {
-            let copy = self.decode(path[1]).clone();
+            let copy = self.decode(path[1]);
             if let Some(a) = self.areas.get_mut(&self.decode(path[0])) {
                 a.connections.insert(copy);
             }
@@ -103,14 +103,14 @@ impl ExplorerMap {
             self.areas.insert(self.decode(path[1]),
                 self.create_area(path[1], path[0]));
         } else {
-            let copy = self.decode(path[0]).clone();
+            let copy = self.decode(path[0]);
             if let Some(a) = self.areas.get_mut(&self.decode(path[1])) {
                 a.connections.insert(copy);
             }
         }
     }
 
-    fn create_area(self: &Self, curr: &str, conn: &str) -> Area {
+    fn create_area(&self, curr: &str, conn: &str) -> Area {
         let mut area = Area::new(self.decode(curr),
             ExplorerMap::get_size(curr));
         area.connections.insert(self.decode(conn));
@@ -118,7 +118,7 @@ impl ExplorerMap {
         area
     }
 
-    fn encode(self: &mut Self, entry: String) {
+    fn encode(&mut self, entry: String) {
         match entry.as_str() {
             "start" => self.map_coding.entry(entry).or_insert(0),
             "end" => self.map_coding.entry(entry).or_insert(999),
@@ -132,7 +132,7 @@ impl ExplorerMap {
         };
     }
 
-    fn decode(self: &Self, entry: &str) -> usize {
+    fn decode(&self, entry: &str) -> usize {
         *self.map_coding.get(entry).unwrap()
     }
 
@@ -143,7 +143,7 @@ impl ExplorerMap {
         CaveSize::Big
     }
 
-    fn reset(self: &mut Self) {
+    fn reset(&mut self) {
         self.nv_caves.clear();
         self.explored_paths.clear();
         self.current_path.clear();
@@ -154,14 +154,14 @@ impl ExplorerMap {
 
 //Only separated for easier navigation. Ones below are navigation functions
 impl ExplorerMap {
-    fn trace_paths(self: &mut Self) {
+    fn trace_paths(&mut self) {
         let start = self.areas.get(&0).unwrap().clone();
         self.walk(&start);
 
         println!("Total paths: {:?}", self.explored_paths.len());
     }
 
-    fn walk(self: &mut Self, area: &Area) {
+    fn walk(&mut self, area: &Area) {
         self.current_path.push(area.code);
         if area.code == 999 {
             self.explored_paths.push(self.current_path.clone());
@@ -179,7 +179,7 @@ impl ExplorerMap {
         }
 
         for next_code in &area.connections {
-            let next_area = self.areas.get(&next_code).unwrap().clone();
+            let next_area = self.areas.get(next_code).unwrap().clone();
             if self.is_valid_visit(&next_area, area.code) {
                 self.walk(&next_area);
             }
@@ -195,7 +195,7 @@ impl ExplorerMap {
         self.current_path.pop();
     }
 
-    fn is_valid_visit(self: &Self, next_area: &Area, current_code: usize) -> bool {
+    fn is_valid_visit(&self, next_area: &Area, current_code: usize) -> bool {
         let mut is_valid = true;
         let mut limit = 1;
 
@@ -210,10 +210,9 @@ impl ExplorerMap {
                 is_valid = false;
             }
         } else if 1 == next_area.connections.len() &&
-            self.nv_caves.contains_key(&current_code) {
-            if *self.nv_caves.get(&current_code).unwrap() >= limit {
+            self.nv_caves.contains_key(&current_code) &&
+            *self.nv_caves.get(&current_code).unwrap() >= limit {
                 is_valid = false;
-            }
         }
 
         is_valid

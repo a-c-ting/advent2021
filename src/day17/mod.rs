@@ -64,7 +64,7 @@ fn launch_probe(target_range_x: RangeInclusive<isize>,
     let mut y_time = 0;
     while y_pos > *target_range_y.start() {
         y_pos += y_vel;
-        y_vel = y_vel - 1;
+        y_vel -= 1;
         y_time += 1;
 
         if y_vel == 0 {
@@ -82,7 +82,7 @@ fn launch_probe(target_range_x: RangeInclusive<isize>,
     for time in 1..y_time+1 {
         x_pos += x_vel;
         if x_vel > 0 {
-            x_vel = x_vel - 1;
+            x_vel -= 1;
         } else {
             x_vel = 0;
         }

@@ -4,10 +4,8 @@ use std::collections::BTreeMap;
 pub fn read_input(input_path: &str) -> String {
     println!("Reading file {}\n", input_path);
 
-    let file_contents = fs::read_to_string(input_path)
-        .expect("Error in Reading File");
-
-    file_contents
+    fs::read_to_string(input_path)
+        .expect("Error in Reading File")
 }
 
 pub fn remap_to_vector(input: BTreeMap<usize, usize> ) -> Vec<usize> {

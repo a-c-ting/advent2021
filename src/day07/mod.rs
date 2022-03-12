@@ -94,7 +94,8 @@ fn get_pos_and_fuel_needed_p2(crab_positions: &Vec<isize>,
 }
 
 fn transform_to_int_vec(input: Vec<&str>) -> Vec<isize> {
-    input.into_iter().map(
-        |d_timer| (isize::from_str_radix(d_timer, 10).unwrap())
-    ).collect::<Vec<isize>>()
+    input
+    .into_iter()
+    .map(|d_timer| d_timer.parse().unwrap() )
+    .collect::<Vec<isize>>()
 }

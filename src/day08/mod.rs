@@ -56,7 +56,7 @@ fn decode_sequence(map: &HashMap<String, u16>,
     let mut output_int = 0;
 
     let multipliers = [1000, 100, 10, 1];
-    for (display_pos, output) in (&displayed.outputs).into_iter().enumerate() {
+    for (display_pos, output) in (&displayed.outputs).iter().enumerate() {
         for (sequence, int_ver) in map {
             if includes_all(sequence, output) &&
                 output.len() == sequence.len() {
@@ -116,7 +116,7 @@ fn find_other_numbers(map: &mut HashMap<String, u16>,
 
     // Nine
     for pattern in &displayed.patterns {
-        if 6 == pattern.len() && includes_all(pattern, &get_seq(&map, 3)) {
+        if 6 == pattern.len() && includes_all(pattern, &get_seq(map, 3)) {
             map.insert(pattern.to_owned(), 9);
         }
     }
@@ -129,7 +129,7 @@ fn find_other_numbers(map: &mut HashMap<String, u16>,
     }
 }
 
-fn get_diff_letter(seq: &String, more_segs_seq: &String) -> char {
+fn get_diff_letter(seq: &str, more_segs_seq: &str) -> char {
     if seq.len()+1 != more_segs_seq.len() {
         panic!("get_diff_letter Should be only one seg difference");
     }
@@ -143,7 +143,7 @@ fn get_diff_letter(seq: &String, more_segs_seq: &String) -> char {
     panic!("get_diff_letter could not find");
 }
 
-fn includes_all(target: &String, required_segs: &String) -> bool {
+fn includes_all(target: &str, required_segs: &str) -> bool {
     for t_char in required_segs.chars() {
         if !target.contains(t_char) {
             return false

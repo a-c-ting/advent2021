@@ -86,7 +86,7 @@ fn _fishmageddon(init_fish: Vec<u8>, days: u16) {
                     fishes.push(8);
                 },
                 _ => {
-                    fishes[idx] = fishes[idx] - 1;
+                    fishes[idx] -= 1;
                 },
             }
         }
@@ -97,7 +97,8 @@ fn _fishmageddon(init_fish: Vec<u8>, days: u16) {
 }
 
 fn get_fish_zombie_init_data(input: Vec<&str>) -> Vec<u8> {
-    input.into_iter().map(
-        |d_timer| (u8::from_str_radix(d_timer, 10).unwrap())
-    ).collect::<Vec<u8>>()
+    input
+    .into_iter()
+    .map( |d_timer| (d_timer.parse().unwrap()) )
+    .collect::<Vec<u8>>()
 }

@@ -25,13 +25,13 @@ struct Paper {
 }
 
 impl Paper {
-    fn init_limits(self: &mut Self) {
+    fn init_limits(&mut self) {
         for (x, y) in &self.dots {
             self.max = (cmp::max(self.max.0, *x), cmp::max(self.max.1, *y));
         }
     }
 
-    fn start(self: &mut Self) {
+    fn start(&mut self) {
         self.init_limits();
 
         self.fold(self.folds[0].0, self.folds[0].1);
@@ -39,20 +39,20 @@ impl Paper {
 
         let folds = self.folds.clone();
         for (fold_type, fold_pos) in folds.iter().skip(1) {
-            self.fold(fold_type.clone(), fold_pos.clone());
+            self.fold(*fold_type, *fold_pos);
         }
 
         self.draw();
     }
 
-    fn fold(self: &mut Self, ftype: FoldType, pos: usize) {
+    fn fold(&mut self, ftype: FoldType, pos: usize) {
         match ftype {
             FoldType::Horizontal => self.fold_h(pos),
             FoldType::Vertical => self.fold_v(pos),
         }
     }
 
-    fn fold_h(self: &mut Self, pos: usize){
+    fn fold_h(&mut self, pos: usize){
         if (self.max.1 - (pos + 1)) > pos {
             panic!("Sanity check. Not folded in middle");
         }
@@ -73,7 +73,7 @@ impl Paper {
         self.max.1 = pos - 1;
     }
 
-    fn fold_v(self: &mut Self, pos: usize){
+    fn fold_v(&mut self, pos: usize){
         if (self.max.0 - (pos + 1)) > pos {
             panic!("Sanity check. Not folded in middle");
         }
@@ -94,7 +94,7 @@ impl Paper {
         self.max.0 = pos-1;
     }
 
-    fn draw(self: &Self) {
+    fn draw(&self) {
         for y in 0..self.max.1+1 {
             for x in 0..self.max.0+1 {
                 if self.dots.contains(&(x, y)) {
@@ -121,20 +121,22 @@ impl Paper {
                     panic!("Input Error: coords");
                 }
 
-                paper.dots.insert((usize::from_str_radix(coords[0], 10).unwrap(),
-                usize::from_str_radix(coords[1],10).unwrap()));
-            } else if line.contains("=") {
+                paper
+                .dots
+                .insert((coords[0].parse::<usize>().unwrap(),
+                coords[1].parse::<usize>().unwrap()));
+            } else if line.contains('=') {
                 let fold_instr = line.split_terminator('=').collect::<Vec<&str>>();
                 if fold_instr.len() != 2 {
                     panic!("Input Error: fold instructions");
                 }
 
-                let fold = usize::from_str_radix(fold_instr[1], 10).unwrap();
+                let fold = fold_instr[1].parse::<usize>().unwrap();
 
                 let f_type: FoldType;
-                if line.contains("x") {
+                if line.contains('x') {
                     f_type = FoldType::Vertical;
-                } else if line.contains("y") {
+                } else if line.contains('y') {
                     f_type = FoldType::Horizontal;
                 } else {
                     panic!("missing fold type");

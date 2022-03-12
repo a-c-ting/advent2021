@@ -8,7 +8,7 @@ pub fn execute() {
         file_contents.split_terminator('\n').collect::<Vec<_>>();
 
     let mut map = convert_map(lines);
-    let mut copy = map.clone();
+    let mut copy = map;
 
     process_steps(&mut map, 100);
     find_octo_sync(&mut copy);
@@ -36,7 +36,7 @@ fn process_steps(map: &mut OctoMap, stepcount: usize) {
     }
 
     println!("Final map:");
-    display_map(&map);
+    display_map(map);
 
     println!("\nFlash count: {}\n", flash_count);
 }
@@ -87,16 +87,13 @@ fn process_energy_wave(map: &mut OctoMap, row: usize, col: usize) {
 }
 
 fn validate_increase(energy: usize) -> usize {
-    let val_energy: usize;
     match energy {
-        0 => val_energy = 0,
+        0 => 0,
         //max energy overflow is +8
-        10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 => val_energy = 50,
-        50 => val_energy = 50,
-        _ => val_energy = energy + 1,
+        10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 => 50,
+        50 => 50,
+        _ => energy + 1,
     }
-
-    val_energy
 }
 
 fn get_coords_for_update(map: &OctoMap)
@@ -104,8 +101,8 @@ fn get_coords_for_update(map: &OctoMap)
     let (mut r, mut c) = (0, 0);
     let mut no_flash_found = true;
     'l1:
-    for (row, rows) in map.into_iter().enumerate() {
-        for (column, energy) in rows.into_iter().enumerate() {
+    for (row, rows) in map.iter().enumerate() {
+        for (column, energy) in rows.iter().enumerate() {
             if (*energy > 9) && (*energy < 50) {
                 r = row;
                 c = column;
@@ -141,17 +138,16 @@ fn get_surround_coords(row: usize, column: usize) -> Vec<(usize, usize)> {
 }
 
 fn validate_bounds(x: isize) -> usize {
-    let limit;
-    match x {
-        -1 => limit = 0,
-        10 => limit = x - 1,
-        _ => limit = x,
-    }
+    let limit = match x {
+        -1 => 0,
+        10 => x - 1,
+        _ => x,
+    };
     limit as usize
 }
 
 fn trigger_step(map: &mut OctoMap) {
-    for (_, rows) in map.into_iter().enumerate() {
+    for (_, rows) in map.iter_mut().enumerate() {
         for energy in rows {
             *energy += 1;
         }
@@ -189,8 +185,8 @@ fn convert_map(input: Vec<&str>) -> OctoMap {
 
 fn count_flashes(map: &OctoMap) -> usize {
     let mut flash_count = 0;
-    for (row, rows) in map.into_iter().enumerate() {
-        for (column, _) in rows.into_iter().enumerate() {
+    for (row, rows) in map.iter().enumerate() {
+        for (column, _) in rows.iter().enumerate() {
             if 0 == map[row][column] {
                 flash_count += 1;
             }

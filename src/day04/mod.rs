@@ -54,7 +54,7 @@ fn run_draws(draws: &Vec<u32>,
                 if check_win(&scoreboards[card_no]) {
                     let win_score = calculate_score(
                         &scoreboards[card_no],
-                        &card,
+                        card,
                         drawn_number);
 
                     add_cards_to_winners(&mut winning_cards,
@@ -73,9 +73,8 @@ fn run_draws(draws: &Vec<u32>,
 }
 
 fn add_cards_to_winners(winners: &mut Vec<(u32, u32)>, card_no: u32, score: u32) {
-    match winners.iter().find(|(no, _)| no == &card_no) {
-        None => winners.push((card_no, score)),
-        _ => (),
+    if None == winners.iter().find(|(no, _)| no == &card_no) {
+        winners.push((card_no, score));
     }
 }
 
@@ -93,8 +92,7 @@ fn calculate_score(scoreboard: &[[u32;BINGO_LEN];BINGO_LEN],
         }
     }
 
-    let score = last_draw*sum;
-    score
+    last_draw*sum
 }
 
 fn check_win(card: &[[u32;BINGO_LEN];BINGO_LEN]) -> bool {
@@ -119,9 +117,8 @@ fn get_hit_coordinates(card: &[[u32; BINGO_LEN]; BINGO_LEN], drawn_number: &u32)
         -> Option<(usize, usize)> {
     for (row_index, row_numbers) in card.iter().enumerate() {
         for (col_index, num) in row_numbers.iter().enumerate() {
-            match num == drawn_number {
-                true => return Some((row_index, col_index)),
-                _ => (),
+            if num == drawn_number {
+                return Some((row_index, col_index));
             }
         }
     }

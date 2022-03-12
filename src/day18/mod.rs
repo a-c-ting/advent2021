@@ -24,7 +24,7 @@ pub fn execute() {
     let mut highest = usize::MIN;
     for summand1 in &summands {
         for summand2 in &summands {
-            highest = cmp::max(highest, get_magnitude(&add_snail_num(&summand1, &summand2)));
+            highest = cmp::max(highest, get_magnitude(&add_snail_num(summand1, summand2)));
         }
     }
     println!("\nHighest magnitude between any two Snail num is:\n{}", highest);
@@ -199,14 +199,13 @@ fn get_magnitude(input: &SnailNum) -> usize {
         for elem in &num {
             if elem.depth != depth {
                 temp.push(*elem);
+            } else if let Some(val) = held_value {
+                temp.push(SnailNumElem{ num: val*3 + elem.num*2, depth: depth - 1 });
+                held_value = None;
             } else {
-                if let Some(val) = held_value {
-                    temp.push(SnailNumElem{ num: val*3 + elem.num*2, depth: depth - 1 });
-                    held_value = None;
-                } else {
-                    held_value = Some(elem.num);
-                }
+                held_value = Some(elem.num);
             }
+
         }
         num.clear();
         num.append(&mut temp);
@@ -215,7 +214,7 @@ fn get_magnitude(input: &SnailNum) -> usize {
     if num.len() != 1 {
         unreachable!(); //at top level, Snail Nums are a pair by definition.
     } else {
-        return num[0].num
+        num[0].num
     }
 }
 

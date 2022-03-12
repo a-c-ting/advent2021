@@ -22,7 +22,7 @@ impl Node {
         }
     }
 
-    pub fn generate_neighbors(self: &Self, len: usize) -> Vec<(usize, usize)> {
+    pub fn generate_neighbors(&self, len: usize) -> Vec<(usize, usize)> {
         let mut temp = vec![
             Node::generate_coord(self.x as isize, self.y as isize - 1, len),
             Node::generate_coord(self.x as isize, self.y as isize + 1, len),
