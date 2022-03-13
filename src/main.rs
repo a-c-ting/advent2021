@@ -1,3 +1,14 @@
+#![allow(
+    // clippy::print_with_newline,
+    // clippy::println_empty_string,
+    // clippy::println_empty_string,
+    clippy::needless_return,
+    clippy::ptr_arg,
+    clippy::needless_late_init,
+    clippy::enum_variant_names,
+    clippy::collapsible_if,
+    clippy::collapsible_else_if
+  )]
 mod day01;
 mod day02;
 mod day03;
@@ -16,6 +27,8 @@ mod day15;
 mod day16;
 mod day17;
 mod day18;
+// mod day19;
+mod day20;
 mod shared_utils;
 
 use std::env;
@@ -47,6 +60,8 @@ fn main() {
         16 => day16::execute(),
         17 => day17::execute(),
         18 => day18::execute(),
+        // 19 => day19::execute(),
+        20 => day20::execute(),
         _ => println!("That doesn't exist!"),
     }
 
